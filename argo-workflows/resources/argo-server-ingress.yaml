@@ -4,17 +4,26 @@ metadata:
   name: argo-server
   annotations:
     # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
-    ingress.kubernetes.io/proxy-body-size: 100M
-    kubernetes.io/ingress.class: "nginx"
-    ingress.kubernetes.io/app-root: "/"
-    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+#    ingress.kubernetes.io/proxy-body-size: 100M
+#    kubernetes.io/ingress.class: "nginx"
+#    ingress.kubernetes.io/app-root: "/"
+#    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    alb.ingress.kubernetes.io/group.name: healios-nexus-ops-test
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/tags: Name=healios-nexus-ops-test, Environment=ops-test
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+    meta.helm.sh/release-name: argo-cd
+    meta.helm.sh/release-namespace: argocd
 spec:
   tls:
   - hosts:
-    - workflows.apps.argoproj.io
+    - workflows.ops-test.healios.care
     secretName: argo-workflows-secret
   rules:
-  - host: workflows.apps.argoproj.io
+  - host: workflows.ops-test.healios.care
     http:
       paths:
       - path: /
