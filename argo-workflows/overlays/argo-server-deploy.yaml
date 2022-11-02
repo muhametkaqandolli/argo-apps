@@ -31,7 +31,7 @@ spec:
       serviceAccountName: argo-server
       containers:
         - name: argo-server
-          image: quay.io/argoproj/argocli:latest
+          image: quay.io/argoproj/argocli:v3.4.3
           securityContext:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
@@ -39,7 +39,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          args: [ server ]
+#          args: [ server ]
           env: []
           ports:
             - name: web
