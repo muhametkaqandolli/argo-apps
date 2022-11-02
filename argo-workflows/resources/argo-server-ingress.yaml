@@ -16,19 +16,19 @@ metadata:
     alb.ingress.kubernetes.io/tags: Name=healios-nexus-ops-test, Environment=ops-test
     alb.ingress.kubernetes.io/target-type: ip
     kubernetes.io/ingress.class: alb
-    meta.helm.sh/release-name: argo-cd
-    meta.helm.sh/release-namespace: argocd
+    meta.helm.sh/release-name: argo-server
+    meta.helm.sh/release-namespace: argo
 spec:
-  tls:
-  - hosts:
-    - workflows.ops-test.healios.care
-    secretName: argo-workflows-secret
+  # tls:
+  # - hosts:
+  #   - workflows.ops-test.healios.care
+    # secretName: argo-workflows-secret
   rules:
   - host: workflows.ops-test.healios.care
     http:
       paths:
-      - path: /
-        pathType: ImplementationSpecific
+      # - path: /
+      - pathType: ImplementationSpecific
         backend:
           service:
             name: argo-server
