@@ -12,6 +12,6 @@ spec:
           args:
             - server
             - --namespaced
-            - --auth-mode=sso
+            # - --auth-mode=sso
             - --auth-mode=client
             - --x-frame-options=SAMEORIGIN
