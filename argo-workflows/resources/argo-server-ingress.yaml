@@ -27,8 +27,8 @@ spec:
   - host: workflows.ops-test.healios.care
     http:
       paths:
-      # - path: /
-      - pathType: ImplementationSpecific
+      - path: /argo(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: argo-server
