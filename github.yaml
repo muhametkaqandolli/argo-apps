@@ -95,3 +95,38 @@ spec:
 #      insecure: true
 #      active: true
 #      contentType: "json"
+
+###### Short version
+
+# metadata:
+#   name: github
+#   namespace: argocd
+# spec:
+#   service:
+#     ports:
+#       - name: example
+#         port: 12000
+#         targetPort: 12000
+#   github:
+#     example:
+#       id: 0
+#       webhook:
+#         endpoint: /push
+#         method: POST
+#         port: '12000'
+#         url: http://events-webhook.ops-test.healios.care/
+#       owner: 'muhametkaqandolli'
+#       repository: 'argo-apps'
+#       events:
+#         - '*'
+#       apiToken:
+#         name: mk-github-access
+#         key: token
+#       insecure: true
+#       active: true
+#       contentType: json
+#       repositories:
+#         - owner: muhametkaqandolli
+#           names:
+#             - argo-apps
+
