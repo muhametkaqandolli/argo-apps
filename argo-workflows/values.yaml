@@ -463,7 +463,7 @@ server:
 
     # -- List of ingress paths
     paths:
-      - path: /
+      - path: /*
         backend:
           serviceName: workflow-server
           servicePort: 2746
