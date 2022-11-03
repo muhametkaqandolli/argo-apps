@@ -420,7 +420,7 @@ server:
     ## @param server.service.ports.http server service HTTP port
     ##
     ports:
-      http: 80
+      http: 2746
 
     ## Node ports to expose
     ## @param server.service.nodePorts.http Node port for HTTP
