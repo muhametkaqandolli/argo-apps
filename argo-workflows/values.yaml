@@ -463,7 +463,7 @@ server:
 
     # -- List of ingress paths
     paths:
-      - index.html
+      - /*
 
     # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
     pathType: ImplementationSpecific
