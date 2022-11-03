@@ -1,31 +1,31 @@
-apiVersion: argoproj.io/v1alpha1
-kind: EventSource
-metadata:
-  name: mk-webhook
-  namespace: argo
-spec:
-  service:
-    ports:
-      - port: 12001
-        targetPort: 443
-  webhook:
-    mk-example:
-      port: "12001"
-      endpoint: "/"
-      method: POST
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mk-webhook-service
-  namespace: argo
-spec:
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-    - IPv4
-  ipFamilyPolicy: SingleStack
-  ports:
-    - port: 12001
-      protocol: TCP
-      targetPort: 12001
-  type: ClusterIP
+# apiVersion: argoproj.io/v1alpha1
+# kind: EventSource
+# metadata:
+#   name: mk-webhook
+#   namespace: argo
+# spec:
+#   service:
+#     ports:
+#       - port: 12001
+#         targetPort: 443
+#   webhook:
+#     mk-example:
+#       port: "12001"
+#       endpoint: "/"
+#       method: POST
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: mk-webhook-service
+#   namespace: argo
+# spec:
+#   internalTrafficPolicy: Cluster
+#   ipFamilies:
+#     - IPv4
+#   ipFamilyPolicy: SingleStack
+#   ports:
+#     - port: 12001
+#       protocol: TCP
+#       targetPort: 12001
+#   type: ClusterIP
