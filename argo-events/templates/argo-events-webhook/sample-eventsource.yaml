@@ -10,7 +10,7 @@ spec:
         targetPort: 12001
   webhook:
     mk-example:
-      port: 12001
+      port: "12001"
       endpoint: "/"
       method: POST
 # apiVersion: argoproj.io/v1alpha1
