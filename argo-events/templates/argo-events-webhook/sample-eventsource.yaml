@@ -7,7 +7,7 @@ spec:
   service:
     ports:
       - port: 12001
-        targetPort: 12001
+        targetPort: 443
   webhook:
     mk-example:
       port: "12001"
@@ -28,7 +28,4 @@ spec:
     - port: 12001
       protocol: TCP
       targetPort: 12001
-  selector:
-    app.kubernetes.io/instance: argo-events-mk
-    app.kubernetes.io/name: argo-events-events-webhook
   type: ClusterIP
