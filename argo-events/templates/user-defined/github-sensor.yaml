@@ -9,74 +9,35 @@ spec:
     - name: test-dep
       eventSourceName: github
       eventName: argo-app
-      filters:
-        data:
-          - path: header.X-Github-Event
-            type: string
-            value:
-              - pull_request
-              - merge
-          - path: body.action
-            type: string
-            value:
-              - opened
-              - edited
-              - reopened
-              - synchronize
-          - path: body.pull_request.state
-            type: string
-            value:
-              - open
-          - path: body.pull_request.base.ref
-            type: string
-            value:
-              - master
   triggers:
     - template:
-        name: github-workflow-trigger
+        name: webhook-deployment-trigger
         k8s:
-          operation: update
+          operation: create
           source:
             resource:
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
+              apiVersion: apps/v1
+              kind: Deployment
               metadata:
-                name: argo-events
+                generateName: hello-world-
               spec:
-                entrypoint: whalesay
-                arguments:
-                  parameters:
-                    - name: pr-title
-                    - name: pr-number
-                    - name: short-sha
-                templates:
-                  - name: whalesay
-                    inputs:
-                      parameters:
-                        - name: pr-title
-                        - name: pr-number
-                        - name: short-sha
-                    container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
-                      args: ["{{inputs.parameters.pr-title}}"]
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: mydeploy
+                template:
+                  metadata:
+                    labels:
+                      app: mydeploy
+                  spec:
+                    containers:
+                      - name: hello-container
+                        args:
+                          - "hello world"
+                        command:
+                          - cowsay
+                        image: "docker/whalesay:latest"
           parameters:
             - src:
                 dependencyName: test-dep
-                dataKey: body.pull_request.title
-              dest: spec.arguments.parameters.0.value
-            - src:
-                dependencyName: test-dep
-                dataKey: body.pull_request.number
-              dest: spec.arguments.parameters.1.value
-            - src:
-                dependencyName: test-dep
-                dataTemplate: "{{ .Input.body.pull_request.head.sha | substr 0 7 }}"
-              dest: spec.arguments.parameters.2.value
-            - src:
-                dependencyName: test-dep
-                dataTemplate: "{{ .Input.body.pull_request.number }}-{{ .Input.body.pull_request.head.sha | substr 0 7 }}"
-              dest: metadata.name
-              operation: append
-      retryStrategy:
-        steps: 3
+              dest: spec.template.spec.containers.0.args.0
