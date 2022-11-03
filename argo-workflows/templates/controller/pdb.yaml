@@ -1,18 +1,10 @@
 {{- if .Values.controller.pdb.enabled }}
-apiVersion: {{ include "common.capabilities.policy.apiVersion" . }}
+apiVersion: {{ include "argo-workflows.podDisruptionBudget.apiVersion" . }}
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "argo-workflows.controller.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/part-of: argo-workflows
-    app.kubernetes.io/component: controller
-    {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-  {{- end }}
+  name: {{ template "argo-workflows.controller.fullname" . }}
+  labels:
+    {{- include "argo-workflows.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 4 }}
 spec:
   {{- if .Values.controller.pdb.minAvailable }}
   minAvailable: {{ .Values.controller.pdb.minAvailable }}
@@ -22,6 +14,6 @@ spec:
   minAvailable: 0
   {{- end }}
   selector:
-    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
-      app.kubernetes.io/component: controller
+    matchLabels:
+      {{- include "argo-workflows.selectorLabels" (dict "context" . "name" .Values.controller.name) | nindent 6 }}
 {{- end }}

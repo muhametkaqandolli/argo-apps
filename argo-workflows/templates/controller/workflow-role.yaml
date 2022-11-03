@@ -1,32 +1,21 @@
-{{- if .Values.workflows.rbac.create }}
-{{- $namespaces := list .Release.Namespace }}
-{{- if and (not .Values.rbac.singleNamespace) .Values.controller.workflowNamespaces }}
-{{- $namespaces := .Values.controller.workflowNamespaces }}
-{{- end }}
-{{- range $namespaces }}
+{{- if .Values.workflow.rbac.create -}}
+  {{- range $namespace := or .Values.singleNamespace false | ternary (list "") (append .Values.controller.workflowNamespaces (coalesce .Values.workflow.namespace .Release.Namespace) | uniq)  }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "common.names.fullname" $ }}-workflow
-  namespace: {{ . | quote }}
-  labels: {{- include "common.labels.standard" $ | nindent 4 }}
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/part-of: argo-workflows
-    {{- if $.Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
+  name: {{ template "argo-workflows.fullname" $ }}-workflow
+  labels:
+    {{- include "argo-workflows.labels" (dict "context" $ "component" $.Values.controller.name "name" $.Values.controller.name) | nindent 4 }}
+    {{- with $namespace }}
+  namespace: {{ . }}
     {{- end }}
-  {{- if $.Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
-  {{- end }}
 rules:
   - apiGroups:
       - ""
     resources:
       - pods
-      - configmaps
     verbs:
-      - list
       - get
       - watch
       - patch
@@ -37,5 +26,33 @@ rules:
     verbs:
       - get
       - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    verbs:
+      - create
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtaskresults
+    verbs:
+      - create
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtasksets
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtasksets/status
+      {{/* TODO: This resource is for app version <= v3.2, so please remove it when app version v3.2 is no more used. */}}
+      - workflowtasksets
+    verbs:
+      - patch
   {{- end }}
+
 {{- end }}

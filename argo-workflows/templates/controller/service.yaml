@@ -1,65 +1,38 @@
-{{- if or .Values.controller.metrics.enabled .Values.controller.telemetry.enabled }}
+{{- if or .Values.controller.metricsConfig.enabled .Values.controller.telemetryConfig.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "argo-workflows.controller.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/part-of: argo-workflows
-    app.kubernetes.io/component: controller
-    {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+  name: {{ template "argo-workflows.controller.fullname" . }}
+  labels:
+    {{- include "argo-workflows.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 4 }}
+    app.kubernetes.io/version: {{ default (include "argo-workflows.defaultTag" .) .Values.controller.image.tag | trunc 63 | quote }}
+    {{- with .Values.controller.serviceLabels }}
+      {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- if or .Values.controller.service.annotations .Values.commonAnnotations }}
+  {{- with .Values.controller.serviceAnnotations }}
   annotations:
-    {{- if .Values.controller.service.annotations }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.controller.service.annotations "context" $) | nindent 4 }}
-    {{- end }}
-    {{- if .Values.commonAnnotations }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-    {{- end }}
+    {{- toYaml . | nindent 4}}
   {{- end }}
 spec:
-  type: {{ .Values.controller.service.type }}
-  {{- if and .Values.controller.service.clusterIP (eq .Values.controller.service.type "ClusterIP") }}
-  clusterIP: {{ .Values.controller.service.clusterIP }}
-  {{- end }}
-  {{- if (or (eq .Values.controller.service.type "LoadBalancer") (eq .Values.controller.service.type "NodePort")) }}
-  externalTrafficPolicy: {{ .Values.controller.service.externalTrafficPolicy | quote }}
-  {{- end }}
-  {{ if eq .Values.controller.service.type "LoadBalancer" }}
-  loadBalancerSourceRanges: {{ .Values.controller.service.loadBalancerSourceRanges }}
-  {{ end }}
-  {{- if (and (eq .Values.controller.service.type "LoadBalancer") (not (empty .Values.controller.service.loadBalancerIP))) }}
-  loadBalancerIP: {{ .Values.controller.service.loadBalancerIP }}
-  {{- end }}
   ports:
-  {{- if .Values.controller.metrics.enabled }}
-    - name: tcp-metrics
-      port: {{ .Values.controller.service.ports.metrics }}
-      protocol: TCP
-      targetPort: {{ .Values.controller.containerPorts.metrics }}
-      {{- if (and (or (eq .Values.controller.service.type "NodePort") (eq .Values.controller.service.type "LoadBalancer")) (not (empty .Values.controller.service.nodePorts.metrics))) }}
-      nodePort: {{ .Values.controller.service.nodePorts.metrics }}
-      {{- else if eq .Values.controller.service.type "ClusterIP" }}
-      nodePort: null
-      {{- end }}
+  {{- if .Values.controller.metricsConfig.enabled }}
+  - name: {{ .Values.controller.metricsConfig.servicePortName }}
+    port: {{ .Values.controller.metricsConfig.servicePort }}
+    protocol: TCP
+    targetPort: {{ .Values.controller.metricsConfig.port }}
   {{- end }}
-  {{- if .Values.controller.telemetry.enabled }}
-    - name: tcp-telemetry
-      port: {{ .Values.controller.service.ports.telemetry }}
-      protocol: TCP
-      targetPort: {{ .Values.controller.containerPorts.telemetry }}
-      {{- if (and (or (eq .Values.controller.service.type "NodePort") (eq .Values.controller.service.type "LoadBalancer")) (not (empty .Values.controller.service.nodePorts.telemetry))) }}
-      nodePort: {{ .Values.controller.service.nodePorts.telemetry }}
-      {{- else if eq .Values.controller.service.type "ClusterIP" }}
-      nodePort: null
-      {{- end }}
+  {{- if .Values.controller.telemetryConfig.enabled }}
+  - name: {{ .Values.controller.telemetryConfig.servicePortName }}
+    port: {{ .Values.controller.telemetryConfig.servicePort }}
+    protocol: TCP
+    targetPort: {{ .Values.controller.telemetryConfig.port }}
   {{- end }}
-    {{- if .Values.controller.service.extraPorts }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.controller.service.extraPorts "context" $) | nindent 4 }}
-    {{- end }}
-  selector: {{- include "common.labels.matchLabels" . | nindent 4 }}
-    app.kubernetes.io/component: controller
+  selector:
+    {{- include "argo-workflows.selectorLabels" (dict "context" . "name" .Values.controller.name) | nindent 4 }}
   sessionAffinity: None
+  type: {{ .Values.controller.serviceType }}
+  {{- if and (eq .Values.controller.serviceType "LoadBalancer") .Values.controller.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.controller.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
 {{- end -}}

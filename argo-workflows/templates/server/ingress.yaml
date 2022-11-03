@@ -1,69 +1,89 @@
-{{- if .Values.ingress.enabled }}
-apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+{{- if .Values.server.ingress.enabled -}}
+{{- $serviceName := include "argo-workflows.server.fullname" . -}}
+{{- $servicePort := .Values.server.servicePort -}}
+{{- $paths := .Values.server.ingress.paths -}}
+{{- $extraPaths := .Values.server.ingress.extraPaths -}}
+{{- $pathType := .Values.server.ingress.pathType -}}
+apiVersion: {{ include "argo-workflows.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ include "argo-workflows.server.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: server
-    app.kubernetes.io/part-of: argo-workflows
-    {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
-    {{- end }}
-  {{- if or .Values.ingress.annotations .Values.commonAnnotations .Values.ingress.certManager }}
+{{- if .Values.server.ingress.annotations }}
   annotations:
-    # Ref: https://argoproj.github.io/argo-workflows/argo-server/#ingress
-    ingress.kubernetes.io/rewrite-target: /$2
-    {{- if .Values.server.secure }}
-    ingress.kubernetes.io/protocol: https # Traefik
-    nginx.ingress.kubernetes.io/backend-protocol: https # Nginx
-    {{- end }}
-    {{- if .Values.ingress.certManager }}
-    kubernetes.io/tls-acme: "true"
-    {{- end }}
-    {{- if .Values.ingress.annotations }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.ingress.annotations "context" $) | nindent 4 }}
-    {{- end }}
-    {{- if .Values.commonAnnotations }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-    {{- end }}
-  {{- end }}
-spec:
-  {{- if and .Values.ingress.ingressClassName }}
-  ingressClassName: {{ .Values.ingress.ingressClassName | quote }}
-  {{- end }}
-  rules:
-    - host: workflows.ops-test.healios.care
-      http:
-        paths:
-        - backend:
-            service:
-              name: argo-workflows-server
-              port:
-                number: 2746
-          pathType: ImplementationSpecific
-    {{- range .Values.ingress.extraHosts }}
-    - host: {{ .name | quote }}
-      http:
-        paths:
-          - path: {{ default "/" .path }}
-            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
-            pathType: {{ default "ImplementationSpecific" .pathType }}
-            {{- end }}
-            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "argo-workflows.server.fullname" $) "servicePort" "http" "context" $) | nindent 14 }}
-    {{- end }}
-    {{- if .Values.ingress.extraRules }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.extraRules "context" $) | nindent 4 }}
-    {{- end }}
-  {{- if or (and .Values.ingress.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.annotations )) .Values.ingress.selfSigned)) .Values.ingress.extraTls }}
-  tls:
-   {{- if and .Values.ingress.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.annotations )) .Values.ingress.selfSigned) }}
-    - hosts:
-        - {{ .Values.ingress.hostname | quote }}
-      secretName: {{ printf "%s-tls" .Values.ingress.hostname }}
-    {{- end }}
-    {{- if .Values.ingress.extraTls }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.extraTls "context" $) | nindent 4 }}
-    {{- end }}
+  {{- range $key, $value := .Values.server.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
   {{- end }}
 {{- end }}
+  name: {{ template "argo-workflows.server.fullname" . }}
+  labels:
+    {{- include "argo-workflows.labels" (dict "context" . "component" .Values.server.name "name" .Values.server.name) | nindent 4 }}
+    {{- if .Values.server.ingress.labels }}
+    {{- toYaml .Values.server.ingress.labels | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if eq (include "argo-workflows.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+  {{- with .Values.server.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- end }}
+  rules:
+  {{- if .Values.server.ingress.hosts }}
+    {{- range $host := .Values.server.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          {{- if $extraPaths }}
+          {{- toYaml $extraPaths | nindent 10 }}
+          {{- end }}
+          {{- range $p := $paths }}
+          - path: {{ $p }}
+            {{- if eq (include "argo-workflows.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: {{ $pathType }}
+            {{- end }}
+            backend:
+              {{- if eq (include "argo-workflows.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  {{- if kindIs "float64" $servicePort }}
+                  number: {{ $servicePort }}
+                  {{- else }}
+                  name: {{ $servicePort }}
+                  {{- end }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          {{- end -}}
+    {{- end -}}
+  {{- else }}
+    - http:
+        paths:
+          {{- if $extraPaths }}
+          {{- toYaml $extraPaths | nindent 10 }}
+          {{- end }}
+          {{- range $p := $paths }}
+          - path: {{ $p }}
+            {{- if eq (include "argo-workflows.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: {{ $pathType }}
+            {{- end }}
+            backend:
+              {{- if eq (include "argo-workflows.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  {{- if kindIs "float64" $servicePort }}
+                  number: {{ $servicePort }}
+                  {{- else }}
+                  name: {{ $servicePort }}
+                  {{- end }}
+              {{- else }}
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+              {{- end }}
+          {{- end -}}
+  {{- end -}}
+  {{- if .Values.server.ingress.tls }}
+  tls:
+    {{- toYaml .Values.server.ingress.tls | nindent 4 }}
+  {{- end -}}
+{{- end -}}

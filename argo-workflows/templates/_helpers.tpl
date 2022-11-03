@@ -1,60 +1,79 @@
-{{/*
-Return the proper server image name
-*/}}
-{{- define "argo-workflows.server.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.server.image "global" .Values.global) }}
-{{- end -}}
+{{/* vim: set filetype=mustache: */}}
 
 {{/*
-Return the proper controller image name
-*/}}
-{{- define "argo-workflows.controller.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.controller.image "global" .Values.global) }}
-{{- end -}}
-
-{{/*
-Return the proper executor image name
-*/}}
-{{- define "argo-workflows.executor.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.executor.image "global" .Values.global) }}
-{{- end -}}
-
-{{/*
-Return the proper service name for Argo Workflows server
+Create argo workflows server name and version as used by the chart label.
 */}}
 {{- define "argo-workflows.server.fullname" -}}
-  {{- printf "%s-server" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" (include "argo-workflows.fullname" .) .Values.server.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Return the proper service name for Argo Workflows controller
+Create controller name and version as used by the chart label.
 */}}
 {{- define "argo-workflows.controller.fullname" -}}
-  {{- printf "%s-controller" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" (include "argo-workflows.fullname" .) .Values.controller.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create a default fully qualified postgresql name.
+Expand the name of the chart.
+*/}}
+{{- define "argo-workflows.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "argo-workflows.postgresql.fullname" -}}
-{{- include "common.names.dependency.fullname" (dict "chartName" "postgresql" "chartValues" .Values.postgresql "context" $) -}}
+{{- define "argo-workflows.fullname" -}}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
-Create a default fully qualified mysql name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+Create chart name and version as used by the chart label.
 */}}
-{{- define "argo-workflows.mysql.fullname" -}}
-{{- include "common.names.dependency.fullname" (dict "chartName" "mysql" "chartValues" .Values.mysql "context" $) -}}
+{{- define "argo-workflows.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Common labels
+*/}}
+{{- define "argo-workflows.labels" -}}
+helm.sh/chart: {{ include "argo-workflows.chart" .context }}
+{{ include "argo-workflows.selectorLabels" (dict "context" .context "component" .component "name" .name) }}
+app.kubernetes.io/managed-by: {{ .context.Release.Service }}
+app.kubernetes.io/part-of: argo-workflows
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "argo-workflows.selectorLabels" -}}
+{{- if .name -}}
+app.kubernetes.io/name: {{ include "argo-workflows.name" .context }}-{{ .name }}
+{{ end -}}
+app.kubernetes.io/instance: {{ .context.Release.Name }}
+{{- if .component }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
+{{- end }}
 
 {{/*
 Create the name of the server service account to use
 */}}
-{{- define "argo-workflows.server.serviceAccountName" -}}
+{{- define "argo-workflows.serverServiceAccountName" -}}
 {{- if .Values.server.serviceAccount.create -}}
-    {{ default (printf "%s-server" (include "common.names.fullname" .)) .Values.server.serviceAccount.name }}
+    {{ default (include "argo-workflows.server.fullname" .) .Values.server.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.server.serviceAccount.name }}
 {{- end -}}
@@ -63,199 +82,48 @@ Create the name of the server service account to use
 {{/*
 Create the name of the controller service account to use
 */}}
-{{- define "argo-workflows.controller.serviceAccountName" -}}
+{{- define "argo-workflows.controllerServiceAccountName" -}}
 {{- if .Values.controller.serviceAccount.create -}}
-    {{ default (printf "%s-controller" (include "common.names.fullname" .)) .Values.controller.serviceAccount.name }}
+    {{ default (include "argo-workflows.controller.fullname" .) .Values.controller.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.controller.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Create the name of the workflows service account to use
+Return the appropriate apiVersion for ingress
 */}}
-{{- define "argo-workflows.workflows.serviceAccountName" -}}
-{{- if .Values.workflows.serviceAccount.create -}}
-    {{ default (printf "%s-workflows" (include "common.names.fullname" .)) .Values.workflows.serviceAccount.name }}
+{{- define "argo-workflows.ingress.apiVersion" -}}
+{{- if semverCompare "<1.14-0" (include "argo-workflows.kubeVersion" $) -}}
+{{- print "extensions/v1beta1" -}}
+{{- else if semverCompare "<1.19-0" (include "argo-workflows.kubeVersion" $) -}}
+{{- print "networking.k8s.io/v1beta1" -}}
 {{- else -}}
-    {{ default "default" .Values.workflows.serviceAccount.name }}
+{{- print "networking.k8s.io/v1" -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return the proper Docker Image Registry Secret Names
+Return the appropriate apiVersion for pod disruption budget
 */}}
-{{- define "argo-workflows.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.server.image .Values.controller.image) "global" .Values.global) -}}
-{{- end -}}
-
-{{/*
-Return the proper configmap for the controller
-*/}}
-{{- define "argo-workflows.controller.configMapName" -}}
-{{- if .Values.controller.existingConfigMap }}
-{{- .Values.controller.existingConfigMap -}}
+{{- define "argo-workflows.podDisruptionBudget.apiVersion" -}}
+{{- if semverCompare "<1.21-0" (include "argo-workflows.kubeVersion" $) -}}
+{{- print "policy/v1beta1" -}}
 {{- else -}}
-{{- include "argo-workflows.controller.fullname" . -}}
+{{- print "policy/v1" -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return true if persistence is enabled
+Return the target Kubernetes version
 */}}
-{{- define "argo-workflows.controller.persistence.enabled" -}}
-{{- if or .Values.postgresql.enabled .Values.mysql.enabled .Values.externalDatabase.enabled -}}
-{{- true -}}
-{{- end -}}
+{{- define "argo-workflows.kubeVersion" -}}
+  {{- default .Capabilities.KubeVersion.Version .Values.kubeVersionOverride }}
 {{- end -}}
 
 {{/*
-Return the proper database username
+Return the default Argo Workflows app version
 */}}
-{{- define "argo-workflows.controller.database.username" -}}
-{{- if .Values.postgresql.enabled -}}
-    {{- if .Values.global.postgresql }}
-        {{- if .Values.global.postgresql.auth }}
-            {{- coalesce .Values.global.postgresql.auth.username .Values.postgresql.auth.username -}}
-        {{- else -}}
-            {{- .Values.postgresql.auth.username -}}
-        {{- end -}}
-    {{- else -}}
-        {{- .Values.postgresql.auth.username -}}
-    {{- end -}}
-{{- end -}}
-{{- if .Values.mysql.enabled -}}
-{{- .Values.mysql.auth.username -}}
-{{- end -}}
-{{- if .Values.externalDatabase.enabled -}}
-{{- .Values.externalDatabase.username -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper database username secret name
-*/}}
-{{- define "argo-workflows.controller.database.username.secret" -}}
-{{- printf "%s-%s" (include "argo-workflows.controller.fullname" .) "database" -}}
-{{- end -}}
-
-{{/*
-Return the proper database password secret
-*/}}
-{{- define "argo-workflows.controller.database.password.secret" -}}
-{{- if .Values.postgresql.enabled -}}
-    {{- if .Values.global.postgresql }}
-        {{- if .Values.global.postgresql.auth }}
-            {{- if .Values.global.postgresql.auth.existingSecret }}
-                {{- tpl .Values.global.postgresql.auth.existingSecret $ -}}
-            {{- else -}}
-                {{- default (include "argo-workflows.postgresql.fullname" .) (tpl .Values.postgresql.auth.existingSecret $) -}}
-            {{- end -}}
-        {{- else -}}
-            {{- default (include "argo-workflows.postgresql.fullname" .) (tpl .Values.postgresql.auth.existingSecret $) -}}
-        {{- end -}}
-    {{- else -}}
-        {{- default (include "argo-workflows.postgresql.fullname" .) (tpl .Values.postgresql.auth.existingSecret $) -}}
-    {{- end -}}
-{{- end -}}
-{{- if .Values.mysql.enabled -}}
-{{- include "argo-workflows.mysql.fullname" . -}}
-{{- end -}}
-{{- if .Values.externalDatabase.enabled -}}
-{{- if .Values.externalDatabase.existingSecret -}}
-{{- tpl .Values.externalDatabase.existingSecret . -}}
-{{- else -}}
-{{- include "argo-workflows.controller.database.username.secret" . -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper database password secret key
-*/}}
-{{- define "argo-workflows.controller.database.password.secret.key" -}}
-{{- if .Values.postgresql.enabled -}}
-{{- printf "%s" "postgres-password" -}}
-{{- end -}}
-{{- if .Values.mysql.enabled -}}
-{{- printf "%s" "mysql-password" -}}
-{{- end -}}
-{{- if .Values.externalDatabase.enabled -}}
-{{- printf "%s" "database-password" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper database host
-The validate values function checks that both types are not set at the same time
-*/}}
-{{- define "argo-workflows.controller.database.host" -}}
-{{- if .Values.postgresql.enabled -}}
-{{- include "argo-workflows.postgresql.fullname" . -}}
-{{- end -}}
-{{- if .Values.mysql.enabled -}}
-{{- include "argo-workflows.mysql.fullname" . -}}
-{{- end -}}
-{{- if .Values.externalDatabase.enabled -}}
-{{- .Values.externalDatabase.host -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper database
-*/}}
-{{- define "argo-workflows.controller.database" -}}
-{{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.auth.database -}}
-{{- end -}}
-{{- if .Values.mysql.enabled -}}
-{{- .Values.mysql.auth.database -}}
-{{- end -}}
-{{- if .Values.externalDatabase.enabled -}}
-{{- .Values.externalDatabase.database -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper database port
-*/}}
-{{- define "argo-workflows.controller.database.port" -}}
-{{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.service.ports.postgresql -}}
-{{- end -}}
-{{- if .Values.mysql.enabled -}}
-{{- .Values.mysql.service.port -}}
-{{- end -}}
-{{- if .Values.externalDatabase.enabled -}}
-{{- .Values.externalDatabase.port -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Validate database configuration
-*/}}
-{{- define "argo-workflows.validate.database.config" -}}
-{{- if or (and .Values.postgresql.enabled .Values.mysql.enabled) (and .Values.externalDatabase.enabled .Values.mysql.enabled) (and .Values.postgresql.enabled .Values.externalDatabase.enabled) -}}
-{{- printf "Validation error: more than one type of database specified, you should either configure postgresql, mysql or an external database" -}}
-{{- end -}}
-{{- if and .Values.externalDatabase.enabled (not .Values.externalDatabase.database) -}}
-{{- printf "Validation error: External database provided without the database parameter" -}}
-{{- end -}}
-{{- if and .Values.externalDatabase.enabled (not .Values.externalDatabase.type) -}}
-{{- printf "Validation error: External database provided without the database type parameter" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Compile all warnings into a single message.
-*/}}
-{{- define "argo-workflows.validateValues" -}}
-{{- $messages := list -}}
-{{- $messages := append $messages (include "argo-workflows.validate.database.config" .) -}}
-{{- $messages := without $messages "" -}}
-{{- $message := join "\n" $messages -}}
-
-{{- if $message -}}
-{{-   printf "\nVALUES VALIDATION:\n%s" $message -}}
-{{- end -}}
+{{- define "argo-workflows.defaultTag" -}}
+  {{- default .Chart.AppVersion .Values.images.tag }}
 {{- end -}}

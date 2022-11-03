@@ -1,114 +1,63 @@
-apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "argo-workflows.controller.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/part-of: argo-workflows
-    {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  name: {{ template "argo-workflows.controller.fullname" . }}
+  labels:
+    {{- include "argo-workflows.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 4 }}
+    app.kubernetes.io/version: {{ default (include "argo-workflows.defaultTag" .) .Values.controller.image.tag | trunc 63 | quote }}
+  {{- with .Values.controller.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.controller.replicaCount }}
-  {{- if .Values.controller.updateStrategy }}
-  strategy: {{- toYaml .Values.controller.updateStrategy | nindent 4 }}
-  {{- end }}
+  replicas: {{ .Values.controller.replicas }}
   selector:
-    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
-      app.kubernetes.io/component: controller
+    matchLabels:
+      {{- include "argo-workflows.selectorLabels" (dict "context" . "name" .Values.controller.name) | nindent 6 }}
   template:
     metadata:
+      labels:
+        {{- include "argo-workflows.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 8 }}
+        app.kubernetes.io/version: {{ default (include "argo-workflows.defaultTag" .) .Values.controller.image.tag | trunc 63 | quote }}
+        {{- with.Values.controller.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.controller.podAnnotations }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.controller.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.controller.podAnnotations "context" $) | nindent 8 }}
-        {{- end }}
-        {{- if .Values.commonAnnotations }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-        {{- end }}
-      labels: {{- include "common.labels.standard" . | nindent 8 }}
-        app.kubernetes.io/component: controller
-        {{- if .Values.controller.podLabels }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.controller.podLabels "context" $) | nindent 8 }}
-        {{- end }}
-        {{- if .Values.commonLabels }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
-        {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
-      {{- if .Values.controller.schedulerName }}
-      schedulerName: {{ .Values.controller.schedulerName | quote }}
-      {{- end }}
-      serviceAccountName: {{ include "argo-workflows.controller.serviceAccountName" . }}
-      {{- include "argo-workflows.imagePullSecrets" . | nindent 6 }}
-      {{- if .Values.controller.hostAliases }}
-      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.controller.hostAliases "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.affinity }}
-      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.controller.affinity "context" $) | nindent 8 }}
-      {{- else }}
-      affinity:
-        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.controller.podAffinityPreset "component" "controller" "context" $) | nindent 10 }}
-        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.controller.podAntiAffinityPreset "component" "controller" "context" $) | nindent 10 }}
-        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.controller.nodeAffinityPreset.type "key" .Values.controller.nodeAffinityPreset.key "values" .Values.controller.nodeAffinityPreset.values) | nindent 10 }}
-      {{- end }}
-      {{- if .Values.controller.nodeSelector }}
-      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.controller.nodeSelector "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.tolerations }}
-      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.controller.tolerations "context" .) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.topologySpreadConstraints }}
-      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.controller.topologySpreadConstraints "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.priorityClassName }}
-      priorityClassName: {{ .Values.controller.priorityClassName | quote }}
-      {{- end }}
-      {{- if .Values.controller.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.controller.podSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.initContainers }}
-      initContainers:
-        {{- include "common.tplvalues.render" (dict "value" .Values.controller.initContainers "context" $) | nindent 8 }}
+      serviceAccountName: {{ template "argo-workflows.controllerServiceAccountName" . }}
+      {{- with .Values.controller.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: controller
-          image: {{ include "argo-workflows.controller.image" . }}
-          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
-          {{- if .Values.controller.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.controller.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
-          {{- if .Values.controller.command }}
-          command: {{- include "common.tplvalues.render" (dict "value" .Values.controller.command "context" $) | nindent 12 }}
-          {{- end }}
+          image: "{{ .Values.controller.image.registry }}/{{ .Values.controller.image.repository }}:{{ default (include "argo-workflows.defaultTag" .) .Values.controller.image.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          command: [ "workflow-controller" ]
           args:
-          {{- if .Values.controller.args }}
-          {{- include "common.tplvalues.render" (dict "value" .Values.controller.args "context" $) | nindent 12 }}
-          {{- else }}
-            - --configmap
-            - {{ include "argo-workflows.controller.configMapName" . }}
-            - --executor-image
-            - {{ include "argo-workflows.executor.image" . }}
-            - --executor-image-pull-policy
-            - {{ .Values.executor.image.pullPolicy }}
-            - --loglevel
-            - {{ .Values.controller.logging.level }}
-            - --gloglevel
-            - {{ .Values.controller.logging.globalLevel | quote }}
-            {{- if .Values.rbac.singleNamespace }}
-            - --namespaced
-            {{- end }}
-            {{- if .Values.controller.workflowWorkers }}
-            - --workflow-workers
-            - {{ .Values.controller.workflowWorkers | quote }}
-            {{- end }}
-            {{- if .Values.controller.extraArgs }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraArgs "context" $) | nindent 12 }}
-            {{- end }}
-            {{- end }}
+          - "--configmap"
+          - "{{ template "argo-workflows.controller.fullname" . }}-configmap"
+          - "--executor-image"
+          - "{{ .Values.executor.image.registry }}/{{ .Values.executor.image.repository }}:{{ default (include "argo-workflows.defaultTag" .) .Values.executor.image.tag }}"
+          - "--loglevel"
+          - "{{ .Values.controller.logging.level }}"
+          - "--gloglevel"
+          - "{{ .Values.controller.logging.globallevel }}"
+          {{- if .Values.singleNamespace }}
+          - "--namespaced"
+          {{- end }}
+          {{- with .Values.controller.workflowWorkers }}
+          - "--workflow-workers"
+          - {{ . | quote }}
+          {{- end }}
+          {{- with .Values.controller.extraArgs }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.controller.securityContext | nindent 12 }}
           env:
             - name: ARGO_NAMESPACE
               valueFrom:
@@ -120,76 +69,54 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.name
-            {{- if .Values.controller.extraEnvVars }}
-            {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
-            {{- end }}
-          envFrom:
-            {{- if .Values.controller.extraEnvVarsCM }}
-            - configMapRef:
-                name: {{ include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVarsCM "context" $) }}
-            {{- end }}
-            {{- if .Values.controller.extraEnvVarsSecret }}
-            - secretRef:
-                name: {{ include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVarsSecret "context" $) }}
-            {{- end }}
-          ports:
-            - name: metrics
-              containerPort: {{ .Values.controller.containerPorts.metrics }}
-            - name: controller
-              # The controller port is hardcoded in the source code.
-              # Ref: https://github.com/argoproj/argo-workflows/blob/b35aabe86be9fa5db80299cebcfb29c32be21047/cmd/workflow-controller/main.go#L116
-              containerPort: 6060
-          {{- if .Values.controller.resources }}
-          resources: {{- toYaml .Values.controller.resources | nindent 12 }}
+          {{- with .Values.controller.extraEnv }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.controller.customLivenessProbe }}
-          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customLivenessProbe "context" $) | nindent 12 }}
-          {{- else if .Values.controller.livenessProbe.enabled }}
-          livenessProbe:
-            tcpSocket:
-              port: 6060
-            initialDelaySeconds: {{ .Values.controller.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.controller.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.controller.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.controller.livenessProbe.successThreshold }}
-            failureThreshold: {{ .Values.controller.livenessProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.controller.customReadinessProbe }}
-          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customReadinessProbe "context" $) | nindent 12 }}
-          {{- else if .Values.controller.readinessProbe.enabled }}
-          readinessProbe:
-            tcpSocket:
-              port: 6060
-            initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.controller.readinessProbe.successThreshold }}
-            failureThreshold: {{ .Values.controller.readinessProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.controller.customStartupProbe }}
-          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customStartupProbe "context" $) | nindent 12 }}
-          {{- else if .Values.controller.startupProbe.enabled }}
-          startupProbe:
-            httpGet:
-              path: {{ .Values.controller.startupProbe.path }}
-              port: http
-            initialDelaySeconds: {{ .Values.controller.startupProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.controller.startupProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.controller.startupProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.controller.startupProbe.successThreshold }}
-            failureThreshold: {{ .Values.controller.startupProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.controller.lifecycleHooks }}
-          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.controller.lifecycleHooks "context" $) | nindent 12 }}
-          {{- end }}
+          resources:
+            {{- toYaml .Values.controller.resources | nindent 12 }}
+          {{- with .Values.controller.volumeMounts }}
           volumeMounts:
-          {{- if .Values.controller.extraVolumeMounts }}
-          {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- toYaml . | nindent 10 }}
           {{- end }}
-        {{- if .Values.controller.sidecars }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 8 }}
+          ports:
+            - name: {{ .Values.controller.metricsConfig.portName }}
+              containerPort: {{ .Values.controller.metricsConfig.port }}
+            - containerPort: 6060
+          livenessProbe: {{ .Values.controller.livenessProbe | toYaml | nindent 12 }}
+        {{- with .Values.controller.extraContainers }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- with .Values.images.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.volumes }}
       volumes:
-        {{- if .Values.controller.extraVolumes }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumes "context" $) | nindent 8 }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.controller.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- range $constraint := . }}
+      - {{ toYaml $constraint | nindent 8 | trim }}
+        {{- if not $constraint.labelSelector }}
+        labelSelector:
+          matchLabels:
+            {{- include "argo-workflows.selectorLabels" (dict "context" $ "name" $.Values.controller.name) | nindent 12 }}
         {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.controller.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
