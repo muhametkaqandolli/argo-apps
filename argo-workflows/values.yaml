@@ -443,7 +443,7 @@ server:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]',
     alb.ingress.kubernetes.io/scheme: internet-facing,
     alb.ingress.kubernetes.io/ssl-redirect: "443",
-    alb.ingress.kubernetes.io/tags: Name=healios-nexus-ops-test, Environment=ops-test,
+    alb.ingress.kubernetes.io/tags: "Name=healios-nexus-ops-test, Environment=ops-test",
     alb.ingress.kubernetes.io/target-type: ip,
     kubernetes.io/ingress.class: alb,
     meta.helm.sh/release-name: argo-cd,
