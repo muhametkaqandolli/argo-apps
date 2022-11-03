@@ -23,3 +23,12 @@ spec:
             port:
               number: 443
         pathType: ImplementationSpecific
+  - host: mk-events-webhook.ops-test.healios.care
+    http:
+      paths:
+      - backend:
+          service:
+            name: mk-webhook-service
+            port:
+              number: 12001
+        pathType: ImplementationSpecific

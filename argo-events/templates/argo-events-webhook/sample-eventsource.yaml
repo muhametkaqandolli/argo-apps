@@ -13,35 +13,22 @@ spec:
       port: "12001"
       endpoint: "/"
       method: POST
-# apiVersion: argoproj.io/v1alpha1
-# kind: EventSource
-# metadata:
-#   name: github
-#   namespace: argo
-# spec:
-#   service:
-#     ports:
-#       - name: example
-#         port: 12000
-#         targetPort: 12000
-#   github:
-#     example:
-#       webhook:
-#         endpoint: /push
-#         method: POST
-#         port: '12000'
-#         url: http://events-webhook.ops-test.healios.care/
-#       owner: 'muhametkaqandolli'
-#       repository: 'argo-apps'
-#       events:
-#         - '*'
-#       apiToken:
-#         name: mk-github-access
-#         key: token
-#       insecure: true
-#       active: true
-#       contentType: json
-#       repositories:
-#         - owner: muhametkaqandolli
-#           names:
-#             - argo-apps
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mk-webhook-service
+  namespace: argo
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - port: 12001
+      protocol: TCP
+      targetPort: 443
+  selector:
+    app.kubernetes.io/instance: argo-events-mk
+    app.kubernetes.io/name: argo-events-events-webhook
+  type: ClusterIP
