@@ -63,7 +63,7 @@ spec:
         {{- end }}
         ports:
         - name: webhook
-          containerPort: 443
+          containerPort: 12001
           protocol: TCP
         livenessProbe:
           tcpSocket:
