@@ -464,14 +464,15 @@ server:
     # -- List of ingress paths
     paths:
       - path: /
-        backend:
-          serviceName: workflow-server
-          servicePort: 2746
 
     # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
     pathType: ImplementationSpecific
     # -- Additional ingress paths
-    extraPaths: []
+    extraPaths:
+      - path: /   
+        backend: 
+          serviceName: workflow-server
+          servicePort: 2746
       # - path: /*
       #   backend:
       #     serviceName: ssl-redirect
