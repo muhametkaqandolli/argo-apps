@@ -9,19 +9,19 @@ spec:
         port: 12000
         targetPort: 12000
   github:
-    example:
-      repositories:
-        - owner: muhametkaqandolli
-          names:
-            - argo-apps
+    argo-app:
+      repositories: argo-apps
+      owner: muhametkaqandolli
       webhook:
-        endpoint: /push
+        endpoint: /argo-app
         port: "12000"
         method: POST
-        url: https://events-github.ops-test.healios.care/
+        url: https://events-github.ops-test.healios.care
       events:
         - "*"
       apiToken:
         name: mk-github-access
         key: token
       contentType: json
+      insecure: true
+      active: true
