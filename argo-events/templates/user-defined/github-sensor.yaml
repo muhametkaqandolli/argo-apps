@@ -61,7 +61,7 @@ spec:
                     container:
                       image: docker/whalesay:latest
                       command: [cowsay]
-                      args: ["{{  inputs.parameters.pr-title  }}"]
+                      args: ["test"]
           parameters:
             - src:
                 dependencyName: test-dep
