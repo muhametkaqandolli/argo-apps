@@ -469,13 +469,13 @@ server:
     pathType: ImplementationSpecific
     # -- Additional ingress paths
     extraPaths:
-      - path: /   
-        pathType: ImplementationSpecific
-        backend: 
-          service:
-            name: workflow-server
-            port:
-              number: 2746
+      # - path: /   
+      #   pathType: ImplementationSpecific
+      #   backend: 
+      #     service:
+      #       name: workflow-server
+      #       port:
+      #         number: 2746
 
       # - path: /*
       #   backend:
