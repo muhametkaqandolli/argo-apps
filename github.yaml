@@ -22,10 +22,7 @@ spec:
         endpoint: /push
         port: "12000"
         method: POST
-        url: http://url-that-is-reachable-from-GitHub
-      # type of events to listen to.
-      # following listens to everything, hence *
-      # You can find more info on https://developer.github.com/v3/activity/events/types/
+        url: http://events-webhook.ops-test.healios.care/
       events:
         - "*"
 
@@ -34,7 +31,7 @@ spec:
       # +optional
       apiToken:
         # Name of the K8s secret that contains the access token
-        name: github-access
+        name: mk-github-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
         key: token
 
@@ -55,8 +52,8 @@ spec:
       contentType: json
       
     example-without-api-credentials:
-      owner: "argoproj"
-      repository: "argo"
+      owner: "muhametkaqandolli"
+      repository: "argo-apps"
       webhook:
         endpoint: "/push"
         port: "13000"
@@ -64,7 +61,7 @@ spec:
       events:
         - "*"
       webhookSecret:
-        name: github-access
+        name: events-webhook-certs
         key: secret
       insecure: true
       active: true
