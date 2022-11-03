@@ -18,7 +18,7 @@ spec:
         endpoint: /push
         port: "12000"
         method: POST
-        url: http://events-github.ops-test.healios.care/
+        url: https://events-github.ops-test.healios.care/
       events:
         - "*"
       apiToken:
