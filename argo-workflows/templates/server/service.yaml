@@ -35,7 +35,7 @@ spec:
   ports:
     - name: http
       port: {{ .Values.server.service.ports.http }}
-      targetPort: web
+      targetPort: 2746 #web
       {{- if (and (or (eq .Values.server.service.type "NodePort") (eq .Values.server.service.type "LoadBalancer")) (not (empty .Values.server.service.nodePorts.http))) }}
       nodePort: {{ .Values.server.service.nodePorts.http }}
       {{- else if eq .Values.server.service.type "ClusterIP" }}
