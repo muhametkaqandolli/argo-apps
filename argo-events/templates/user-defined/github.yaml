@@ -5,8 +5,7 @@ metadata:
 spec:
   service:
     ports:
-      - name: example
-        port: 12000
+      - port: 12000
         targetPort: 12000
   github:
     argo-app:
