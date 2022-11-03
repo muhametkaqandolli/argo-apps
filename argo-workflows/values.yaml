@@ -446,8 +446,8 @@ server:
     alb.ingress.kubernetes.io/tags: "Name=healios-nexus-ops-test, Environment=ops-test",
     alb.ingress.kubernetes.io/target-type: ip,
     kubernetes.io/ingress.class: alb,
-    meta.helm.sh/release-name: argo-cd,
-    meta.helm.sh/release-namespace: argocd
+    meta.helm.sh/release-name: argo,
+    meta.helm.sh/release-namespace: argo
     }
     # -- Additional ingress labels
     labels: {}
