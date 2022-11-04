@@ -9,7 +9,6 @@ spec:
     eventName: microfast
   triggers:
   - template:
-      conditions: "mr-open"
       name: mr-deploy
       k8s:
         operation: create
