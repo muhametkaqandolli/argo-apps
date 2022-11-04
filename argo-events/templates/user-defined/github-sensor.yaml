@@ -11,33 +11,33 @@ spec:
       eventName: argo-app
   triggers:
     - template:
-        name: webhook-deployment-trigger
+        name: webhook-workflow-trigger
         k8s:
           operation: create
           source:
             resource:
-              apiVersion: apps/v1
-              kind: Deployment
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
               metadata:
-                generateName: hello-world-
+                generateName: webhookgithub-
               spec:
-                replicas: 1
-                selector:
-                  matchLabels:
-                    app: mydeploy
-                template:
-                  metadata:
-                    labels:
-                      app: mydeploy
-                  spec:
-                    containers:
-                      - name: hello-container
-                        args:
-                          - "hello world"
-                        command:
-                          - cowsay
-                        image: "docker/whalesay:latest"
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                    - name: message
+                      # the value will get overridden by event payload from test-dep
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:
                 dependencyName: test-dep
-              dest: spec.template.spec.containers.0.args.0         
+                dataKey: body.message
+              dest: spec.arguments.parameters.0.value
