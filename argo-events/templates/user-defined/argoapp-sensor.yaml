@@ -20,7 +20,7 @@ spec:
             kind: Application
             metadata:
               name: demo-webapp
-              namespace: nexus-ops-test
+              namespace: argocd
             spec:
               project: default
               source:
