@@ -3,7 +3,7 @@
 replicaCount: 2
 image:
   repository: memikaqandolli/devops-image
-  tag: 1
+  tag: latest
   # pullSecret: regsecret
   pullPolicy: IfNotPresent
   # for local development against Minikube registry
