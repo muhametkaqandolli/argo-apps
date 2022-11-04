@@ -79,3 +79,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: ops-test-sensor-sa
+    namespace: argo
