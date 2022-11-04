@@ -22,22 +22,24 @@ spec:
                 generateName: webhookgithub-
               spec:
                 entrypoint: whalesay
-                arguments:
-                  parameters:
-                    - name: message
-                      # the value will get overridden by event payload from test-dep
-                      value: hello world
+                # arguments:
+                #   parameters:
+                #     - name: message
+                #       # the value will get overridden by event payload from test-dep
+                #       value: hello world
                 templates:
                   - name: whalesay
-                    inputs:
-                      parameters:
-                        - name: message
+                    # inputs:
+                    #   parameters:
+                    #     - name: message
                     container:
                       image: docker/whalesay:latest
                       command: [cowsay]
-                      args: ["{{inputs.parameters.message}}"]
+                      args:
+                        - "hello"
           parameters:
             - src:
                 dependencyName: test-dep
                 dataKey: body.message
-              dest: spec.arguments.parameters.0.0.value
+              # dest: spec.arguments.parameters.0.value
+              dest: spec.templates.0.container.args.0
