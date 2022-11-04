@@ -1,15 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: mr-deploy
+  name: webapp-sample
 spec:
+  template:
+    serviceAccountName: nexus-ops-test
   dependencies:
-  - name: mr-open
+  - name: push
     eventSourceName: github
     eventName: argo-app
   triggers:
   - template:
-      name: mr-deploy
+      name: webapp-sample
       k8s:
         operation: create
         source:
