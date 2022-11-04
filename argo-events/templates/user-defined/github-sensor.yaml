@@ -29,9 +29,6 @@ spec:
                 #       value: hello world
                 templates:
                   - name: whalesay
-                    # inputs:
-                    #   parameters:
-                    #     - name: message
                     container:
                       image: docker/whalesay:latest
                       command: [cowsay]
