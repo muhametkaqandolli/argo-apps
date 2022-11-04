@@ -4,7 +4,7 @@ metadata:
   name: webapp-sample
 spec:
   template:
-    serviceAccountName: nexus-ops-test
+    serviceAccountName: ops-test-sensor-sa
   dependencies:
   - name: push
     eventSourceName: github
