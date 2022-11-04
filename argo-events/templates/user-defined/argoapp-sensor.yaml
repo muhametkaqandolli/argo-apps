@@ -29,3 +29,16 @@ spec:
                 namespace: nexus-ops-test
                 server: 'https://kubernetes.default.svc'
               syncPolicy: {}
+        parameters:
+        - src:
+            dependencyName: mr-open
+            dataTemplate: "MR: {{ .Input.body.object_attributes.iid }}"
+          dest: spec.source.helm.values
+        - src:
+            dependencyName: mr-open
+            dataTemplate: "dyn-website-mr-{{ .Input.body.object_attributes.iid }}"
+          dest: metadata.name
+        - src:
+            dependencyName: mr-open
+            dataTemplate: "dyn-website-mr-{{ .Input.body.object_attributes.iid }}"
+          dest: spec.destination.namespace
