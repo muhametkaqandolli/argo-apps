@@ -40,4 +40,4 @@ spec:
             - src:
                 dependencyName: test-dep
                 dataKey: body.message
-              dest: spec.arguments.parameters.0.value
+              dest: spec.arguments.parameters.0.0.value
