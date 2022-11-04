@@ -30,4 +30,5 @@ spec:
               destination:
                 namespace: nexus-ops-test
                 server: 'https://kubernetes.default.svc'
-              syncPolicy: {}
+              syncPolicy:
+                automated: {}
