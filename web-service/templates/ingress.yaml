@@ -27,8 +27,11 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
+            pathType: ImplementationSpecific      
     {{- end -}}
   {{- if .Values.ingress.tls }}
   tls:
