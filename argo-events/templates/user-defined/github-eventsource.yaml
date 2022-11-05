@@ -32,7 +32,7 @@ spec:
       repository: dotnet-webapp
       owner: muhametkaqandolli
       webhook:
-        endpoint: /
+        endpoint: /dotnetweb
         port: "13000"
         method: POST
         url: https://events-github.ops-test.healios.care
@@ -41,6 +41,6 @@ spec:
       apiToken:
         name: mk-github-access
         key: token
-      contentType: json
+      contentType: "json"
       insecure: true
       active: true
