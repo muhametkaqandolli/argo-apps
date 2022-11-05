@@ -5,8 +5,12 @@ metadata:
 spec:
   service:
     ports:
-      - port: 12000
+      - name: argo-app
+        port: 12000
         targetPort: 12000
+      - name: dotnetweb
+        port: 13000
+        targetPort: 13000
   github:
     argo-app:
       repository: argo-apps
@@ -14,6 +18,22 @@ spec:
       webhook:
         endpoint: /argo-app
         port: "12000"
+        method: POST
+        url: https://events-github.ops-test.healios.care
+      events:
+        - "*"
+      apiToken:
+        name: mk-github-access
+        key: token
+      contentType: json
+      insecure: true
+      active: true
+    dotnetweb:
+      repository: dotnet-webapp
+      owner: muhametkaqandolli
+      webhook:
+        endpoint: /
+        port: "13000"
         method: POST
         url: https://events-github.ops-test.healios.care
       events:

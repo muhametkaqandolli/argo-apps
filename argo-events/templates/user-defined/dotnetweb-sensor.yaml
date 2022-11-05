@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: dotnetweb-sensor
+spec:
+  template:
+    serviceAccountName: ops-test-sensor-sa
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: dotnetweb
+  triggers:
+    - template:
+        name: dotnetweb-workflow-trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: dotnetweb-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  - name: whalesay
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args:
+                        - "hello"
