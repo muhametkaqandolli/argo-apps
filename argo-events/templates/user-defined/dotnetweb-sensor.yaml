@@ -12,20 +12,30 @@ spec:
   triggers:
     - template:
         name: dotnetweb-workflow-trigger
-        k8s:
-          operation: create
+        argoWorkflow:
+          operation: submit
+          resource: workflows
+          group: argoproj.io
+          version: v1alpha1     
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: dotnetweb-
+                generateName: dotnet-webapp-image-
               spec:
-                entrypoint: whalesay
+                entrypoint: buildandpush-dotnet-webapp
+                volumes:
+                - name: kaniko-secret
+                  secret:
+                    secretName: regcred
+                    items:
+                    - key: .dockerconfigjson
+                      path: config.json
                 templates:
-                  - name: whalesay
-                    container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
-                      args:
-                        - "hello"
+                  dag:
+                    tasks:  
+                    - name: buildandpush-dotnet-webapp
+                      templateRef:
+                        name: dotnet-webapp-image
+                        template: build-dotnet-webapp
