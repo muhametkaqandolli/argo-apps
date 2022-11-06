@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: workflow-succeded
+spec:
+  template:
+    serviceAccountName: ops-test-sensor-sa
+  resource:
+    # watch for completed workflows in any namespace
+    completed-workflow:
+      namespace: argo
+      group: "k8s.io"
+      version: v1
+      resource: workflows
+      eventTypes:
+        - ADD
+      filter:
+        afterStart: true
+        labels:
+          - key: workflows.argoproj.io/phase
+            operation: ==
+            value: "Succeeded"

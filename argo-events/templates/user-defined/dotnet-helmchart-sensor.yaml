@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: dotnetweb-sensor
+spec:
+  template:
+    serviceAccountName: ops-test-sensor-sa
+  dependencies:
+    - name: create-argocd-app
+      eventSourceName: workflow-succeded
+      eventName: completed-workflow
+  triggers:
+    - template:
+        name: dotnet-webapp
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Application
+              metadata:
+                name: dotnet-webapp
+                namespace: argocd
+              spec:
+                project: default
+                source:
+                  repoURL: 'https://github.com/muhametkaqandolli/helm-charts.git'
+                  targetRevision: "HEAD"
+                  path: "dotnetwebapp"
+                destination:
+                  namespace: nexus-ops-test
+                  server: 'https://kubernetes.default.svc'
+                syncPolicy:
+                  automated: {}

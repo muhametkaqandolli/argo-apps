@@ -13,11 +13,7 @@ spec:
     - template:
         name: dotnetweb-workflow-trigger
         argoWorkflow:
-          # group: argoproj.io
-          # version: v1alpha1
-          # resource: workflows
           operation: submit
-          # operation: submit-from
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
@@ -28,40 +24,3 @@ spec:
                 entrypoint: main
                 workflowTemplateRef:
                   name: dotnet-webapp-image
-#                 volumes:
-#                 - name: kaniko-secret
-#                   secret:
-#                     secretName: regcred
-#                     items:
-#                     - key: .dockerconfigjson
-#                       path: config.json
-                # templates:
-                # - name: buildandpush-dotnet-webapp
-                #   dag:
-                #     tasks:  
-                #     - name: buildandpush-dotnet-webapp
-                #       templateRef:
-                #         name: dotnet-webapp-image
-                #         template: main
-    # - template:
-    #     name: webapp-sample
-    #     k8s:
-    #       operation: create
-    #       source:
-    #         resource:
-    #           apiVersion: argoproj.io/v1alpha1
-    #           kind: Application
-    #           metadata:
-    #             name: demo-webapp
-    #             namespace: argocd
-    #           spec:
-    #             project: default
-    #             source:
-    #               repoURL: 'https://github.com/muhametkaqandolli/argo-apps.git'
-    #               targetRevision: "HEAD"
-    #               path: "web-service"
-    #             destination:
-    #               namespace: nexus-ops-test
-    #               server: 'https://kubernetes.default.svc'
-    #             syncPolicy:
-    #               automated: {}
