@@ -14,7 +14,7 @@ metadata:
   namespace: argo
 spec:
   rules:
-  - host: events-webhook.ops-test.healios.care
+  # - host: events-webhook.ops-test.healios.care
   #   http:
   #     paths:
   #     - backend:
@@ -23,7 +23,7 @@ spec:
   #           port:
   #             number: 12000
   #       pathType: ImplementationSpecific
-  # - host: events-github.ops-test.healios.care
+  - host: events-github.ops-test.healios.care
     http:
       paths:
   #     - backend:
