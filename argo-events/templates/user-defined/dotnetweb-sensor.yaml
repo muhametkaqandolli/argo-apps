@@ -13,11 +13,11 @@ spec:
     - template:
         name: dotnetweb-workflow-trigger
         argoWorkflow:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
           operation: submit
           # operation: submit-from
-          resource: workflows
-          group: argoproj.io
-          version: v1alpha1     
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
@@ -34,6 +34,7 @@ spec:
 #                     - key: .dockerconfigjson
 #                       path: config.json
                 templates:
+                - name: buildandpush-dotnet-webapp
                   dag:
                     tasks:  
                     - name: buildandpush-dotnet-webapp
