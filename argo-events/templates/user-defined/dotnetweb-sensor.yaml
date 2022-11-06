@@ -25,7 +25,7 @@ spec:
               metadata:
                 generateName: dotnet-webapp-image-
               spec:
-                entrypoint: buildandpush-dotnet-webapp
+                entrypoint: main
                 workflowTemplateRef:
                   name: dotnet-webapp-image
 #                 volumes:
