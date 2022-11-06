@@ -13,7 +13,7 @@ spec:
     - template:
         name: dotnet-webapp
         k8s:
-          operation: create
+          operation: apply
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
