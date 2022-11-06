@@ -24,15 +24,15 @@ spec:
   #             number: 12000
   #       pathType: ImplementationSpecific
   # - host: events-github.ops-test.healios.care
-  #   http:
-  #     paths:
+    http:
+      paths:
   #     - backend:
   #         service:
   #           name: github-eventsource-svc
   #           port:
   #             number: 12000
-        pathType: ImplementationSpecific
-        path: /argo-app
+        # pathType: ImplementationSpecific
+        # path: /argo-app
       - backend:
           service:
             name: github-eventsource-svc
