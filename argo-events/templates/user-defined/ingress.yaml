@@ -14,7 +14,7 @@ metadata:
   namespace: argo
 spec:
   rules:
-  # - host: events-webhook.ops-test.healios.care
+  - host: events-webhook.ops-test.healios.care
   #   http:
   #     paths:
   #     - backend:
