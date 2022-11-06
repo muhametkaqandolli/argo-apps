@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: dotnetweb-sensor
+  name: dotnetweb-github-sensor
 spec:
   template:
     serviceAccountName: ops-test-sensor-sa
