@@ -20,3 +20,6 @@ spec:
           - key: workflows.argoproj.io/phase
             operation: ==
             value: "Succeeded"
+          - key: workflows.argoproj.io/workflow-template 
+            operation: ==
+            value: "dotnet-webapp-image"
