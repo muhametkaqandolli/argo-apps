@@ -26,6 +26,8 @@ spec:
                 generateName: dotnet-webapp-image-
               spec:
                 entrypoint: buildandpush-dotnet-webapp
+                workflowTemplateRef:
+                  name: dotnet-webapp-image
 #                 volumes:
 #                 - name: kaniko-secret
 #                   secret:
@@ -33,11 +35,11 @@ spec:
 #                     items:
 #                     - key: .dockerconfigjson
 #                       path: config.json
-                templates:
-                - name: buildandpush-dotnet-webapp
-                  dag:
-                    tasks:  
-                    - name: buildandpush-dotnet-webapp
-                      templateRef:
-                        name: dotnet-webapp-image
-                        template: main
+                # templates:
+                # - name: buildandpush-dotnet-webapp
+                #   dag:
+                #     tasks:  
+                #     - name: buildandpush-dotnet-webapp
+                #       templateRef:
+                #         name: dotnet-webapp-image
+                #         template: main
