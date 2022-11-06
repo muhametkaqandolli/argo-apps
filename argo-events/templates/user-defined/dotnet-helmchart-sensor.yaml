@@ -11,7 +11,7 @@ spec:
       eventName: completed-workflow
   triggers:
     - template:
-        name: dotnet-webapp
+        name: dotnet-webapp-delete
         k8s:
           operation: delete
           source:
@@ -22,7 +22,7 @@ spec:
                 name: dotnet-webapp
                 namespace: argocd
     - template:
-        name: dotnet-webapp
+        name: dotnet-webapp-create
         k8s:
           operation: create
           source:
