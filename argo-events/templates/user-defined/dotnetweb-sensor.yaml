@@ -1,41 +1,41 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: dotnetweb-sensor
-spec:
-  template:
-    serviceAccountName: ops-test-sensor-sa
-  dependencies:
-    - name: push
-      eventSourceName: github
-      eventName: dotnetweb
-  triggers:
-    - template:
-        name: dotnetweb-workflow-trigger
-        argoWorkflow:
-          operation: submit
-          resource: workflows
-          group: argoproj.io
-          version: v1alpha1     
-          source:
-            resource:
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: dotnet-webapp-image-
-              spec:
-                entrypoint: buildandpush-dotnet-webapp
-                volumes:
-                - name: kaniko-secret
-                  secret:
-                    secretName: regcred
-                    items:
-                    - key: .dockerconfigjson
-                      path: config.json
-                templates:
-                  dag:
-                    tasks:  
-                    - name: buildandpush-dotnet-webapp
-                      templateRef:
-                        name: dotnet-webapp-image
-                        template: build-dotnet-webapp
+# apiVersion: argoproj.io/v1alpha1
+# kind: Sensor
+# metadata:
+#   name: dotnetweb-sensor
+# spec:
+#   template:
+#     serviceAccountName: ops-test-sensor-sa
+#   dependencies:
+#     - name: push
+#       eventSourceName: github
+#       eventName: dotnetweb
+#   triggers:
+#     - template:
+#         name: dotnetweb-workflow-trigger
+#         argoWorkflow:
+#           operation: submit
+#           resource: workflows
+#           group: argoproj.io
+#           version: v1alpha1     
+#           source:
+#             resource:
+#               apiVersion: argoproj.io/v1alpha1
+#               kind: Workflow
+#               metadata:
+#                 generateName: dotnet-webapp-image-
+#               spec:
+#                 entrypoint: buildandpush-dotnet-webapp
+#                 volumes:
+#                 - name: kaniko-secret
+#                   secret:
+#                     secretName: regcred
+#                     items:
+#                     - key: .dockerconfigjson
+#                       path: config.json
+#                 templates:
+#                   dag:
+#                     tasks:  
+#                     - name: buildandpush-dotnet-webapp
+#                       templateRef:
+#                         name: dotnet-webapp-image
+#                         template: build-dotnet-webapp
