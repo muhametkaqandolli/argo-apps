@@ -13,11 +13,11 @@ spec:
     - template:
         name: dotnetweb-workflow-trigger
         argoWorkflow:
-#           operation: submit
-          operation: submit-from
-#           resource: workflows
-#           group: argoproj.io
-#           version: v1alpha1     
+          operation: submit
+          # operation: submit-from
+          resource: workflows
+          group: argoproj.io
+          version: v1alpha1     
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
