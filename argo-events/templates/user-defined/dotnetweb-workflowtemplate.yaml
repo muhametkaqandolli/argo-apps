@@ -9,11 +9,8 @@ spec:
       inputs:
         parameters:
           - name: app_repo
-            value: git://github.com/muhametkaqandolli/dotnet-webapp.git
           - name: container_image
-            value: memikaqandolli/dotnet-webapp
           - name: container_tag
-            value: latest
       container:
         name: build-dotnet-webapp-container
         image: gcr.io/kaniko-project/executor:debug
@@ -34,3 +31,11 @@ spec:
             items:
               - key: .dockerconfigjson
                 path: config.json
+  arguments:
+    parameters:
+      - name: argo_app
+        value: git://github.com/muhametkaqandolli/dotnet-webapp.git
+      - name: container_image
+        value: memikaqandolli/dotnet-webapp
+      - name: container_tag
+        value: latest
