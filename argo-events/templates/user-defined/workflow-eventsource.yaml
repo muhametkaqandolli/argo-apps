@@ -9,13 +9,13 @@ spec:
     # watch for completed workflows in any namespace
     completed-workflow:
       namespace: argo
-      group: "k8s.io"
-      version: v1
+      group: "argoproj.io"
+      version: v1alpha1
       resource: workflows
       eventTypes:
         - ADD
       filter:
-        afterStart: true
+        # afterStart: true
         labels:
           - key: workflows.argoproj.io/phase
             operation: ==
