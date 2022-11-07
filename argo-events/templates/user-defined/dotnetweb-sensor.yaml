@@ -1,36 +1,36 @@
-# apiVersion: argoproj.io/v1alpha1
-# kind: Sensor
-# metadata:
-#   name: dotnetweb-github-sensor
-# spec:
-#   template:
-#     serviceAccountName: ops-test-sensor-sa
-#   dependencies:
-#     - name: push
-#       eventSourceName: github
-#       eventName: dotnetweb
-#   triggers:
-#     - template:
-#         name: dotnetweb-workflow-trigger
-#         argoWorkflow:
-#           # operation: submit
-#           operation: submit
-#           source:
-#             workflowTemplate:
-#               name: dotnet-webapp-image
-#               namespace: argo
-#             # resource:
-#             #   apiVersion: argoproj.io/v1alpha1
-#             #   kind: Workflow
-#             #   metadata:
-#             #     generateName: dotnet-webapp-image-
-#             #   spec:
-#             #     entrypoint: main
-#             #     workflowTemplateRef:
-#             #       name: dotnet-webapp-image
-#             #       namespace: argo
-#                 # templates:
-#                 #   templateRef:
-#                 #     name: main
-#                 #     template: dotnet-webapp-image
-#                 #     clusterScope: true
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: dotnetweb-github-sensor
+spec:
+  template:
+    serviceAccountName: ops-test-sensor-sa
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: dotnetweb
+  triggers:
+    - template:
+        name: dotnetweb-workflow-trigger
+        argoWorkflow:
+          # operation: submit
+          operation: submit
+          source:
+            workflowTemplate:
+              name: dotnet-webapp-image
+              namespace: argo
+            # resource:
+            #   apiVersion: argoproj.io/v1alpha1
+            #   kind: Workflow
+            #   metadata:
+            #     generateName: dotnet-webapp-image-
+            #   spec:
+            #     entrypoint: main
+            #     workflowTemplateRef:
+            #       name: dotnet-webapp-image
+            #       namespace: argo
+                # templates:
+                #   templateRef:
+                #     name: main
+                #     template: dotnet-webapp-image
+                #     clusterScope: true
