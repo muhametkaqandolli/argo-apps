@@ -29,7 +29,7 @@ spec:
                     - name: main
                       templateRef:
                         name: dotnet-webapp-image-new
-                        template: main
+                        template: build-dotnet-webapp
                       arguments:
                         parameters:
                         - name: repo_url
