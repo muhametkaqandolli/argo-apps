@@ -28,8 +28,8 @@ spec:
                     tasks:
                     - name: main
                       templateRef:
-                        name: container-image 
-                        template: dotnet-webapp-image-new
+                        name: dotnet-webapp-image-new
+                        template: main
                       arguments:
                         parameters:
                         - name: repo_url
