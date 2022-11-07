@@ -15,7 +15,7 @@ spec:
       eventTypes:
         - ADD
       filter:
-        # afterStart: true
+        afterStart: true
         labels:
           - key: workflows.argoproj.io/phase
             operation: ==
