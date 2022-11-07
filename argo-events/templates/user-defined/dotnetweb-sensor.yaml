@@ -14,7 +14,7 @@ spec:
         name: dotnetweb-workflow-trigger
         argoWorkflow:
           # operation: submit
-          operation: create
+          operation: submit
           source:
             resource:
               apiVersion: argoproj.io/v1alpha1
@@ -23,5 +23,10 @@ spec:
                 generateName: dotnet-webapp-image-
               spec:
                 entrypoint: main
-                workflowTemplateRef:
-                  name: dotnet-webapp-image
+                # workflowTemplateRef:
+                #   name: dotnet-webapp-image
+                templates:
+                  templateRef:
+                    name: main
+                    template: dotnet-webapp-image
+                    clusterScope: true
