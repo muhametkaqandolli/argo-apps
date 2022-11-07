@@ -1,46 +1,33 @@
-apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
-metadata:
-  name: dotnet-webapp-image
-  namespace: argo
-spec:
-  templates:
-    - name: main            
-      dag:                      # Indicates that this is a DAG template
-        tasks:
-        - name: build-and-push-dotnet-webapp
-          template: build-dotnet-webapp 
-          # arguments:
-          #   parameters:
-          #   - name: argo_app
-          #     value: git://github.com/muhametkaqandolli/dotnet-webapp.git
-          #   - name: container_image
-          #     value: memikaqandolli/dotnet-webapp
-          #   - name: container_tag
-          #     value: latest
-    - name: build-dotnet-webapp
-      # inputs:
-      #   parameters:
-      #     - name: app_repo
-      #     - name: container_image
-      #     - name: container_tag
-      container:
-        name: build-dotnet-webapp-container
-        image: gcr.io/kaniko-project/executor:debug
-        command:
-          - /kaniko/executor
-        args:
-          - '--dockerfile=/dotnet-webapp/Dockerfile'
-          - '--context=git://github.com/muhametkaqandolli/dotnet-webapp.git'
-          - >-
-            --destination=memikaqandolli/dotnet-webapp:latest
-        volumeMounts:
-          - name: kaniko-secret
-            mountPath: /kaniko/.docker
-      volumes:
-        - name: kaniko-secret
-          secret:
-            secretName: regcred
-            items:
-              - key: .dockerconfigjson
-                path: config.json
+# apiVersion: argoproj.io/v1alpha1
+# kind: WorkflowTemplate
+# metadata:
+#   name: dotnet-webapp-image
+#   namespace: argo
+# spec:
+#   templates:
+#     - name: main            
+#       dag:
+#         tasks:
+#         - name: build-and-push-dotnet-webapp
+#           template: build-dotnet-webapp 
+#     - name: build-dotnet-webapp
+#       container:
+#         name: build-dotnet-webapp-container
+#         image: gcr.io/kaniko-project/executor:debug
+#         command:
+#           - /kaniko/executor
+#         args:
+#           - '--dockerfile=/dotnet-webapp/Dockerfile'
+#           - '--context=git://github.com/muhametkaqandolli/dotnet-webapp.git'
+#           - >-
+#             --destination=memikaqandolli/dotnet-webapp:latest
+#         volumeMounts:
+#           - name: kaniko-secret
+#             mountPath: /kaniko/.docker
+#       volumes:
+#         - name: kaniko-secret
+#           secret:
+#             secretName: regcred
+#             items:
+#               - key: .dockerconfigjson
+#                 path: config.json

@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: dotnetweb-github-sensor-new
+spec:
+  template:
+    serviceAccountName: ops-test-sensor-sa
+  dependencies:
+    - name: github
+      eventSourceName: github
+      eventName: dotnetweb
+  triggers:
+    - template:
+        name: dotnetweb-workflow-trigger
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: dotnet-webapp-image-
+              spec:
+                entrypoint: main
+                templates:
+                - name: main
+                  dag:
+                    tasks:
+                    - name: main
+                      templateRef:
+                        name: container-image 
+                        template: dotnet-webapp-image
+                      arguments:
+                        parameters:
+                        - name: repo_url
+                          value: ""
+                        # - name: repo_ref
+                        #   value: ""
+                        # - name: repo_commit_id
+                        #   value: ""
+                        - name: container_tag
+                          value: ""
+                        - name: container_image
+                          value: muhametkaqandolli/dotnet-webapp
+          parameters:
+          - src:
+              dependencyName: github
+              dataKey: body.repository.git_url
+            dest: spec.templates.0.dag.tasks.0.arguments.parameters.0.value
+          # - src:
+          #     dependencyName: github
+          #     dataKey: body.ref
+          #   dest: spec.templates.0.dag.tasks.0.arguments.parameters.1.value
+          - src:
+              dependencyName: github
+              dataKey: body.after
+            dest: spec.templates.0.dag.tasks.0.arguments.parameters.1.value
+          # - src:
+          #     dependencyName: github
+          #     dataKey: body.repository.name
+          #   dest: spec.templates.0.dag.tasks.0.arguments.parameters.2.value
+          #   operation: append
