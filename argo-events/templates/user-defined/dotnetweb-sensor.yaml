@@ -24,4 +24,3 @@ spec:
                 entrypoint: main
                 workflowTemplateRef:
                   name: dotnet-webapp-image
-                  template: dotnet-webapp-image
