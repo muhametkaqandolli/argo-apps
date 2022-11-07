@@ -32,7 +32,7 @@ spec:
           - /kaniko/executor
         args:
           - '--dockerfile=/dotnet-webapp/Dockerfile'
-          - '--context={{inputs.parameters.repo_url}}'
+          - '--context="{{inputs.parameters.repo_url}}"'
           - >-
             --destination={{inputs.parameters.container_image}}:{{inputs.parameters.container_tag}}
         volumeMounts:
