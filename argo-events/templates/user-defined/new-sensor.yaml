@@ -41,7 +41,7 @@ spec:
                         - name: container_tag
                           value: ""
                         - name: container_image
-                          value: muhametkaqandolli/dotnet-webapp
+                          value: memikaqandolli/dotnet-webapp
           parameters:
           - src:
               dependencyName: github
