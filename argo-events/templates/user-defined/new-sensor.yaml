@@ -29,7 +29,7 @@ spec:
                     - name: main
                       templateRef:
                         name: container-image 
-                        template: dotnet-webapp-image
+                        template: dotnet-webapp-image-new
                       arguments:
                         parameters:
                         - name: repo_url
