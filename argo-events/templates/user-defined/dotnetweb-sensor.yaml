@@ -16,17 +16,21 @@ spec:
           # operation: submit
           operation: submit
           source:
-            resource:
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: dotnet-webapp-image-
-              spec:
-                entrypoint: main
-                # workflowTemplateRef:
-                #   name: dotnet-webapp-image
-                templates:
-                  templateRef:
-                    name: main
-                    template: dotnet-webapp-image
-                    clusterScope: true
+            workflowTemplate:
+              name: dotnet-webapp-image
+              namespace: argo
+            # resource:
+            #   apiVersion: argoproj.io/v1alpha1
+            #   kind: Workflow
+            #   metadata:
+            #     generateName: dotnet-webapp-image-
+            #   spec:
+            #     entrypoint: main
+            #     workflowTemplateRef:
+            #       name: dotnet-webapp-image
+            #       namespace: argo
+                # templates:
+                #   templateRef:
+                #     name: main
+                #     template: dotnet-webapp-image
+                #     clusterScope: true
