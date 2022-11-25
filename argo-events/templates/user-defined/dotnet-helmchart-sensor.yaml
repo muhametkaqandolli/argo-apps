@@ -10,17 +10,6 @@ spec:
       eventSourceName: workflow-succeded
       eventName: completed-workflow
   triggers:
-    # - template:
-    #     name: dotnet-webapp-delete
-    #     k8s:
-    #       operation: delete
-    #       source:
-    #         resource:
-    #           apiVersion: argoproj.io/v1alpha1
-    #           kind: Application
-    #           metadata:
-    #             name: dotnet-webapp
-    #             namespace: argocd
     - template:
         name: dotnet-webapp-create
         k8s:
