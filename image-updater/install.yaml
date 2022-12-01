@@ -230,8 +230,8 @@ spec:
       - configMap:
           defaultMode: 0777
           items:
-          - key: ecr-login.sh
-            path: ecr-login.sh
+          - key: auth-ecr.sh
+            path: auth-ecr.sh
           name: argocd-image-updater-authscripts
         name: authscripts
       - configMap:
