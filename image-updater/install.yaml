@@ -216,6 +216,8 @@ spec:
           name: ssh-known-hosts
         - mountPath: /app/.ssh
           name: ssh-config
+        - mountPath: /scripts
+          name: authscripts
       serviceAccountName: argocd-image-updater
       volumes:
       - configMap:
