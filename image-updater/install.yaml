@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: argocd-image-updater
     app.kubernetes.io/part-of: argocd-image-updater
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::736234039813:role/healios-management-terraform
+    eks.amazonaws.com/role-arn: arn:aws:iam::116911669293:role/devops
   name: argocd-image-updater
 ---
 apiVersion: rbac.authorization.k8s.io/v1
